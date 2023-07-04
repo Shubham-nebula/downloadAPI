@@ -2,6 +2,7 @@ import json
 import re
 import os
 from flask import Flask, request
+from azure.storage.blob import BlobServiceClient
 from office365_api import SharePoint
 
 app = Flask(__name__)
@@ -9,9 +10,11 @@ app = Flask(__name__)
 FOLDER_DEST = "files"
 
 def save_file(file_n, file_obj):
-    file_path = os.path.join(FOLDER_DEST, file_n)
-    with open(file_path, 'wb') as f:
-        f.write(file_obj)
+    blob_service_client = BlobServiceClient.from_connection_string('DefaultEndpointsProtocol=https;AccountName=azuretestshubham832458;AccountKey=2yEaP59qlgKVv6kEUCA5ARB4wdV3ZRoL2X9zjYCcIxOSYAG1CSBbBlAMPx3uBIe7ilQtSh7purEK+AStvFn8GA==;EndpointSuffix=core.windows.net')
+    container_client = blob_service_client.get_container_client('transcript')
+    blob_client = container_client.get_blob_client(file_n)
+    blob_client.upload_blob(file_obj)
+
 
 def get_file(file_n, folder):
     file_obj = SharePoint().download_file(file_n, folder)
